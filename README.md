@@ -151,26 +151,4 @@ HomeTabs (Bottom Tabs)
        └── Menu lateral (≡) → navegação entre tabs + Sair
 ```
 
----
-
-## Informações do Challenge
-
-| Item | Detalhe |
-|---|---|
-| Programa | Ford FIAP 2026 |
-| Disciplina avaliada (mobile) | Mobile Development and IoT |
-| Data de entrega | 24/05/2026 |
-| Formato | 1 Sprint (vale notas 1 e 2) |
-| Entrega via | Microsoft Teams |
-| Scrum Master | Prof. Yan Coelho — proyan.coelho@fiap.com.br |
-
----
-
-## Regras do Projeto
-
-- Grupos de **3 a 5 integrantes** da mesma turma
-- Não é permitido trocar de grupo durante o semestre
-- A nota da challenge é a **média de todas as entregas** e vale para todas as disciplinas
-
----
 
