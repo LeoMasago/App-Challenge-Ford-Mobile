@@ -18,7 +18,7 @@
 
 Este repositório contém a entrega da disciplina **Mobile Development and IoT** do Challenge Ford FIAP 2026.
 
-O aplicativo foi desenvolvido em **React Native com Expo** e serve como interface mobile para a solução proposta ao desafio da Ford. O app oferece autenticação de usuários, navegação por categorias de veículos e estrutura base para integração com APIs externas e serviços de dados.
+O aplicativo foi desenvolvido em **React Native com Expo** e resolve o **Desafio 01 — Inteligência Competitiva Automotiva**: a partir de uma entrada simples (marca, modelo, versão e lista de atributos técnicos), o app consulta uma base de dados no Firebase Realtime Database e retorna uma lista padronizada de especificações técnicas, com campos explícitos para dados não disponíveis.
 
 ---
 
@@ -30,7 +30,16 @@ O programa **Ford & FIAP: Dados na Prática** une a excelência acadêmica da FI
 
 > Compreender o valor percebido pelo cliente em relação à concorrência exige dados precisos e extremamente organizados.
 
-Desenvolver uma ferramenta que permita receber dados técnicos de veículos concorrentes a partir de uma entrada simples e gerar uma **lista padronizada de especificações técnicas**, com os seguintes requisitos:
+**Entradas obrigatórias:**
+- Marca, Modelo e Versão do veículo
+- Lista livre de atributos técnicos a pesquisar (27 atributos pré-definidos)
+
+**Saída obrigatória:**
+- Lista padronizada de especificações técnicas
+- Formato sempre o mesmo, independente do veículo consultado
+- Campos com dados ausentes exibidos explicitamente como "Não disponível"
+
+**Validação:** o app entrega corretamente todas as especificações técnicas do **Ford Ranger Raptor 2024**.
 
 ---
 
@@ -45,6 +54,7 @@ Desenvolver uma ferramenta que permita receber dados técnicos de veículos conc
 | `@react-navigation/native-stack` | ^7.x | Stack Navigator (auth flow) |
 | `@react-navigation/bottom-tabs` | ^7.x | Bottom Tab Navigator (home) |
 | [Firebase](https://firebase.google.com/) | ^12.12.0 | Autenticação e Realtime Database |
+| [@react-native-async-storage/async-storage](https://react-native-async-storage.github.io/async-storage/) | ^2.x | Histórico de buscas local |
 | [expo-linear-gradient](https://docs.expo.dev/versions/latest/sdk/linear-gradient/) | SDK 54 | Gradientes visuais |
 | [@expo/vector-icons](https://icons.expo.fyi/) | SDK 54 | Ícones (MaterialCommunityIcons) |
 | [react-native-dotenv](https://github.com/goatandsheep/react-native-dotenv) | ^3.4.11 | Variáveis de ambiente via `.env` |
@@ -63,23 +73,49 @@ ford-challenge-v1/
 ├── .env                            # Credenciais Firebase (git-ignored)
 ├── assets/                         # Ícones e splash screen
 └── src/
+    ├── theme.js                    # Cores globais (FORD_BLUE e variações)
     ├── firebase/
     │   ├── config.js               # Inicialização Firebase
-    │   └── authService.js          # login, cadastro, reset de senha
+    │   ├── authService.js          # login, cadastro, reset de senha
+    │   └── vehicleService.js       # seed e consulta de especificações
+    ├── services/
+    │   └── historyService.js       # Histórico de buscas (AsyncStorage)
+    ├── data/
+    │   ├── veiculosData.js         # Dataset com specs de 8 veículos
+    │   └── atributosData.js        # Lista de 27 atributos técnicos
     ├── navigation/
     │   ├── AppNavigator.js         # Stack Navigator raiz
-    │   └── HomeTabs.js             # Bottom Tab Navigator
+    │   └── HomeTabs.js             # Bottom Tab Navigator (4 abas)
     ├── components/
     │   ├── FordLogo.js             # Logo Ford (pure React Native)
-    │   └── HomeHeader.js           # Header com menu lateral animado
+    │   ├── HomeHeader.js           # Header com menu lateral animado
+    │   ├── VehicleCard.js          # Card reutilizável de veículo
+    │   └── CategoryScreen.js       # Tela de categoria compartilhada
     └── screens/
         ├── LoginScreen.js          # Login / Cadastro (pill tab)
-        ├── RegisterScreen.js       # Cadastro standalone
         ├── ForgotPasswordScreen.js # Recuperação de senha
         ├── SedasScreen.js          # Tab — Sedãs
         ├── EsportivosScreen.js     # Tab — Esportivos
-        └── CaminhonetesScreen.js   # Tab — Caminhonetes
+        ├── CaminhonetesScreen.js   # Tab — Caminhonetes
+        ├── HistoricoScreen.js      # Tab — Histórico de buscas
+        ├── BuscaScreen.js          # Formulário de busca personalizada
+        └── ResultadosScreen.js     # Exibição das especificações
 ```
+
+---
+
+## Veículos na Base de Dados
+
+| Categoria | Veículo |
+|---|---|
+| Caminhonete | Ford Ranger Raptor 2024 |
+| Caminhonete | Toyota Hilux 2024 |
+| Caminhonete | Chevrolet S10 2024 |
+| Caminhonete | Mitsubishi L200 Triton 2024 |
+| Caminhonete | Volkswagen Amarok 2024 |
+| Sedã | Toyota Corolla 2024 |
+| Sedã | Honda Civic 2024 |
+| Esportivo | Ford Mustang 2024 |
 
 ---
 
@@ -132,7 +168,6 @@ npx expo start --clear
 Escaneie o QR Code com o **Expo Go** (Android/iOS) ou pressione:
 - `a` para abrir no emulador Android
 - `i` para abrir no simulador iOS
-- `w` para abrir no navegador
 
 ---
 
@@ -140,15 +175,33 @@ Escaneie o QR Code com o **Expo Go** (Android/iOS) ou pressione:
 
 ```
 LoginScreen
-  ├── Pill "Login"    → autenticação → HomeTabs
-  ├── Pill "Cadastro" → criação de conta
-  └── "Esqueceu a senha?" → ForgotPasswordScreen
+  ├── Pill "Login"     → autenticação → HomeTabs
+  └── Pill "Cadastro"  → criação de conta → HomeTabs
+       └── "Esqueceu a senha?" → ForgotPasswordScreen
 
 HomeTabs (Bottom Tabs)
-  ├── Sedãs
-  ├── Esportivos
-  └── Caminhonetes
-       └── Menu lateral (≡) → navegação entre tabs + Sair
+  ├── Sedãs            → lista de sedãs → toque no card → Resultados
+  ├── Esportivos       → lista de esportivos → toque no card → Resultados
+  ├── Caminhonetes     → lista de caminhonetes → toque no card → Resultados
+  │    └── "Busca personalizada" → BuscaScreen → Resultados
+  └── Histórico        → lista de buscas anteriores → toque → Resultados
+
+BuscaScreen
+  ├── Campos: Marca, Modelo, Versão/Ano
+  ├── Seleção de atributos (27 pré-definidos + customizados)
+  └── "Buscar Especificações" → ResultadosScreen
+
+ResultadosScreen
+  └── Lista padronizada de specs com status disponível / não disponível
 ```
 
+---
 
+## Funcionalidades
+
+- **Autenticação** — login e cadastro via Firebase Authentication (email/senha), recuperação de senha
+- **Base de dados** — especificações técnicas de 8 veículos armazenadas no Firebase Realtime Database, populadas automaticamente no primeiro acesso
+- **Busca personalizada** — formulário com seleção livre de atributos técnicos (27 pré-definidos)
+- **Navegação por categoria** — listagem de veículos por tipo (Sedãs, Esportivos, Caminhonetes) com acesso rápido às especificações completas
+- **Saída padronizada** — formato de resultado sempre consistente, com "Não disponível" explícito para dados ausentes
+- **Histórico de buscas** — últimas 10 pesquisas salvas localmente via AsyncStorage, com expiração automática após 30 dias

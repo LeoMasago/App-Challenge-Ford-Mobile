@@ -3,9 +3,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const FORD_BLUE = '#003478';
 
-export default function VehicleCard({ name, description, icon, tag }) {
+export default function VehicleCard({ name, description, icon, tag, onPress }) {
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.85}>
+    <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={onPress}>
       <View style={styles.iconContainer}>
         <MaterialCommunityIcons name={icon} size={42} color={FORD_BLUE} />
       </View>

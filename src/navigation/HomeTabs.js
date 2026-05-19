@@ -3,6 +3,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SedasScreen from '../screens/SedasScreen';
 import EsportivosScreen from '../screens/EsportivosScreen';
 import CaminhonetesScreen from '../screens/CaminhonetesScreen';
+import HistoricoScreen from '../screens/HistoricoScreen';
 const Tab = createBottomTabNavigator();
 
 const FORD_BLUE = '#003478';
@@ -11,6 +12,7 @@ const TAB_ICONS = {
   Sedas: 'car',
   Esportivos: 'car-sports',
   Caminhonetes: 'car-pickup',
+  Historico: 'history',
 };
 
 export default function HomeTabs() {
@@ -45,6 +47,7 @@ export default function HomeTabs() {
       <Tab.Screen name="Sedas" component={SedasScreen} />
       <Tab.Screen name="Esportivos" component={EsportivosScreen} />
       <Tab.Screen name="Caminhonetes" component={CaminhonetesScreen} />
+      <Tab.Screen name="Historico" component={HistoricoScreen} />
     </Tab.Navigator>
   );
 }

@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { loginUser, registerUser } from '../firebase/authService';
+import { seedIfEmpty } from '../firebase/vehicleService';
 import FordLogo from '../components/FordLogo';
 
 const FORD_BLUE = '#003478';
@@ -23,7 +24,6 @@ export default function LoginScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +35,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       await loginUser(email.trim(), password);
+      await seedIfEmpty();
       navigation.navigate('HomeTabs');
     } catch (error) {
       Alert.alert('Erro ao entrar', error.message);
@@ -51,11 +52,8 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       await registerUser(email.trim(), password);
-      Alert.alert('Sucesso', 'Conta criada! Faça login.');
-      setActiveTab('login');
-      setEmail('');
-      setPassword('');
-      setName('');
+      await seedIfEmpty();
+      navigation.navigate('HomeTabs');
     } catch (error) {
       Alert.alert('Erro ao cadastrar', error.message);
     } finally {
@@ -94,19 +92,6 @@ export default function LoginScreen({ navigation }) {
                 </Text>
               </TouchableOpacity>
             </View>
-
-            {activeTab === 'cadastro' && (
-              <View style={styles.inputWrapper}>
-                <MaterialCommunityIcons name="account-outline" size={20} color="#999" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Nome completo"
-                  value={name}
-                  onChangeText={setName}
-                  placeholderTextColor="#AAA"
-                />
-              </View>
-            )}
 
             <View style={styles.inputWrapper}>
               <MaterialCommunityIcons name="email-outline" size={20} color="#999" style={styles.inputIcon} />

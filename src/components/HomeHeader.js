@@ -19,6 +19,7 @@ const MENU_ITEMS = [
   { icon: 'car', label: 'Sedãs', screen: 'Sedas' },
   { icon: 'car-sports', label: 'Esportivos', screen: 'Esportivos' },
   { icon: 'car-pickup', label: 'Caminhonetes', screen: 'Caminhonetes' },
+  { icon: 'history', label: 'Histórico', screen: 'Historico' },
 ];
 
 export default function HomeHeader({ navigation }) {
