@@ -12,15 +12,67 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { TODOS_ATRIBUTOS } from '../data/atributosData';
 import { FORD_BLUE, FORD_BLUE_LIGHT } from '../theme';
 
-const IDS_PADRAO = new Set(['motor', 'potencia', 'torque', 'transmissao', 'tracao']);
+const IDS_PADRAO = new Set(['motor', 'potencia', 'torque', 'transmissao', 'tracao', 'amortecedores', 'aceleracao']);
 
-export default function BuscaScreen({ navigation }) {
+function VeiculoInputs({ titulo, numero, marca, setMarca, modelo, setModelo, versao, setVersao }) {
+  return (
+    <View style={styles.veiculoBox}>
+      <View style={styles.veiculoBoxHeader}>
+        <View style={styles.numeroBadge}>
+          <Text style={styles.numeroBadgeText}>{numero}</Text>
+        </View>
+        <Text style={styles.veiculoBoxTitulo}>{titulo}</Text>
+      </View>
+
+      <Text style={styles.label}>Marca *</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ex: Toyota, Chevrolet, Ford..."
+        placeholderTextColor="#AAA"
+        value={marca}
+        onChangeText={setMarca}
+        autoCapitalize="words"
+      />
+
+      <Text style={styles.label}>Modelo *</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ex: Hilux, S10, Ranger..."
+        placeholderTextColor="#AAA"
+        value={modelo}
+        onChangeText={setModelo}
+        autoCapitalize="words"
+      />
+
+      <Text style={styles.label}>Versão / Ano</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ex: 2024, GR Sport..."
+        placeholderTextColor="#AAA"
+        value={versao}
+        onChangeText={setVersao}
+        autoCapitalize="none"
+      />
+    </View>
+  );
+}
+
+export default function BuscaScreen() {
+  const router = useRouter();
+  const [modo, setModo] = useState('individual');
+
   const [marca, setMarca] = useState('');
   const [modelo, setModelo] = useState('');
   const [versao, setVersao] = useState('');
+
+  const [marca2, setMarca2] = useState('');
+  const [modelo2, setModelo2] = useState('');
+  const [versao2, setVersao2] = useState('');
+
   const [selecionados, setSelecionados] = useState(new Set(IDS_PADRAO));
 
   function toggleAtributo(id) {
@@ -53,18 +105,51 @@ export default function BuscaScreen({ navigation }) {
       .filter((a) => selecionados.has(a.id))
       .map((a) => ({ id: a.id, label: a.label }));
 
-    navigation.navigate('Resultados', {
-      marca: marca.trim(),
-      modelo: modelo.trim(),
-      versao: versao.trim() || '',
-      atributos: atributosSelecionados,
+    router.push({
+      pathname: '/resultados',
+      params: {
+        marca: marca.trim(),
+        modelo: modelo.trim(),
+        versao: versao.trim() || '',
+        atributos: JSON.stringify(atributosSelecionados),
+      },
+    });
+  }
+
+  function comparar() {
+    if (!marca.trim() || !modelo.trim()) {
+      Alert.alert('Campos obrigatórios', 'Preencha Marca e Modelo do Veículo 1.');
+      return;
+    }
+    if (!marca2.trim() || !modelo2.trim()) {
+      Alert.alert('Campos obrigatórios', 'Preencha Marca e Modelo do Veículo 2.');
+      return;
+    }
+    if (selecionados.size === 0) {
+      Alert.alert('Atributos', 'Selecione pelo menos um atributo técnico.');
+      return;
+    }
+
+    const atributosSelecionados = TODOS_ATRIBUTOS
+      .filter((a) => selecionados.has(a.id))
+      .map((a) => ({ id: a.id, label: a.label }));
+
+    router.push({
+      pathname: '/comparacao',
+      params: {
+        veiculos: JSON.stringify([
+          { marca: marca.trim(), modelo: modelo.trim(), versao: versao.trim() || '' },
+          { marca: marca2.trim(), modelo: modelo2.trim(), versao: versao2.trim() || '' },
+        ]),
+        atributos: JSON.stringify(atributosSelecionados),
+      },
     });
   }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <MaterialCommunityIcons name="arrow-left" size={26} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Buscar Especificações</Text>
@@ -73,37 +158,79 @@ export default function BuscaScreen({ navigation }) {
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <Text style={styles.sectionTitle}>Veículo</Text>
 
-          <Text style={styles.label}>Marca *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: Toyota, Chevrolet, Ford..."
-            placeholderTextColor="#AAA"
-            value={marca}
-            onChangeText={setMarca}
-            autoCapitalize="words"
-          />
+          <View style={styles.modoToggle}>
+            <TouchableOpacity
+              style={[styles.modoBtn, modo === 'individual' && styles.modoBtnAtivo]}
+              onPress={() => setModo('individual')}
+            >
+              <MaterialCommunityIcons name="car" size={15} color={modo === 'individual' ? '#FFF' : FORD_BLUE} style={{ marginRight: 6 }} />
+              <Text style={[styles.modoBtnText, modo === 'individual' && styles.modoBtnTextAtivo]}>Individual</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modoBtn, modo === 'comparar' && styles.modoBtnAtivo]}
+              onPress={() => setModo('comparar')}
+            >
+              <MaterialCommunityIcons name="car-multiple" size={15} color={modo === 'comparar' ? '#FFF' : FORD_BLUE} style={{ marginRight: 6 }} />
+              <Text style={[styles.modoBtnText, modo === 'comparar' && styles.modoBtnTextAtivo]}>Comparar</Text>
+            </TouchableOpacity>
+          </View>
 
-          <Text style={styles.label}>Modelo *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: Hilux, S10, Ranger..."
-            placeholderTextColor="#AAA"
-            value={modelo}
-            onChangeText={setModelo}
-            autoCapitalize="words"
-          />
-
-          <Text style={styles.label}>Versão / Ano</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: GR Sport 2024, 2.8 4x4 AT 2025..."
-            placeholderTextColor="#AAA"
-            value={versao}
-            onChangeText={setVersao}
-            autoCapitalize="words"
-          />
+          {modo === 'individual' ? (
+            <>
+              <Text style={styles.sectionTitle}>Veículo</Text>
+              <Text style={styles.label}>Marca *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ex: Toyota, Chevrolet, Ford..."
+                placeholderTextColor="#AAA"
+                value={marca}
+                onChangeText={setMarca}
+                autoCapitalize="words"
+              />
+              <Text style={styles.label}>Modelo *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ex: Hilux, S10, Ranger..."
+                placeholderTextColor="#AAA"
+                value={modelo}
+                onChangeText={setModelo}
+                autoCapitalize="words"
+              />
+              <Text style={styles.label}>Versão / Ano</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ex: GR Sport 2024, 2.8 4x4 AT 2025..."
+                placeholderTextColor="#AAA"
+                value={versao}
+                onChangeText={setVersao}
+                autoCapitalize="none"
+              />
+            </>
+          ) : (
+            <>
+              <VeiculoInputs
+                titulo="Veículo 1"
+                numero="1"
+                marca={marca}
+                setMarca={setMarca}
+                modelo={modelo}
+                setModelo={setModelo}
+                versao={versao}
+                setVersao={setVersao}
+              />
+              <VeiculoInputs
+                titulo="Veículo 2"
+                numero="2"
+                marca={marca2}
+                setMarca={setMarca2}
+                modelo={modelo2}
+                setModelo={setModelo2}
+                versao={versao2}
+                setVersao={setVersao2}
+              />
+            </>
+          )}
 
           <View style={styles.sectionRow}>
             <Text style={styles.sectionTitle}>Atributos Técnicos</Text>
@@ -146,10 +273,17 @@ export default function BuscaScreen({ navigation }) {
             })}
           </View>
 
-          <TouchableOpacity style={styles.buscarBtn} onPress={buscar} activeOpacity={0.85}>
-            <MaterialCommunityIcons name="magnify" size={20} color="#FFF" style={{ marginRight: 8 }} />
-            <Text style={styles.buscarBtnText}>Buscar Especificações</Text>
-          </TouchableOpacity>
+          {modo === 'individual' ? (
+            <TouchableOpacity style={styles.buscarBtn} onPress={buscar} activeOpacity={0.85}>
+              <MaterialCommunityIcons name="magnify" size={20} color="#FFF" style={{ marginRight: 8 }} />
+              <Text style={styles.buscarBtnText}>Buscar Especificações</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.compararBtn} onPress={comparar} activeOpacity={0.85}>
+              <MaterialCommunityIcons name="compare" size={20} color="#FFF" style={{ marginRight: 8 }} />
+              <Text style={styles.buscarBtnText}>Comparar Veículos</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -169,7 +303,49 @@ const styles = StyleSheet.create({
   },
   headerTitle: { color: '#FFF', fontSize: 17, fontWeight: '700', letterSpacing: 0.3 },
   scroll: { backgroundColor: '#F4F6FA', flexGrow: 1, padding: 20, paddingBottom: 40 },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: FORD_BLUE, marginBottom: 12, marginTop: 8 },
+  modoToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#E8EDF5',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 20,
+  },
+  modoBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 9,
+  },
+  modoBtnAtivo: { backgroundColor: FORD_BLUE },
+  modoBtnText: { fontSize: 14, fontWeight: '600', color: FORD_BLUE },
+  modoBtnTextAtivo: { color: '#FFF' },
+  veiculoBox: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#DDE3EE',
+  },
+  veiculoBoxHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  numeroBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: FORD_BLUE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  numeroBadgeText: { color: '#FFF', fontSize: 13, fontWeight: '700' },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: FORD_BLUE, marginBottom: 12, marginTop: 4 },
+  veiculoBoxTitulo: { fontSize: 15, fontWeight: '700', color: FORD_BLUE },
   sectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -183,7 +359,7 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, fontWeight: '600', color: '#444', marginBottom: 6, marginTop: 4 },
   hint: { fontSize: 12, color: '#888', marginBottom: 12 },
   input: {
-    backgroundColor: '#FFF',
+    backgroundColor: '#F4F6FA',
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#DDE3EE',
@@ -191,7 +367,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 15,
     color: '#222',
-    marginBottom: 14,
+    marginBottom: 10,
   },
   atributosGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 28 },
   chip: {
@@ -216,6 +392,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: FORD_BLUE,
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  compararBtn: {
+    backgroundColor: '#1A5FA8',
+    borderRadius: 12,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#1A5FA8',
     shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 6,

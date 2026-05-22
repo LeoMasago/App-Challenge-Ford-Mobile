@@ -12,15 +12,15 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { loginUser, registerUser } from '../firebase/authService';
-import { seedIfEmpty } from '../firebase/vehicleService';
+import { migrarPrecos } from '../firebase/migratePrecos';
+import { solicitarPermissao } from '../services/notificacaoService';
 import FordLogo from '../components/FordLogo';
+import { FORD_BLUE, FORD_BLUE_MID, FORD_BLUE_GRADIENT as FORD_BLUE_LIGHT } from '../theme';
 
-const FORD_BLUE = '#003478';
-const FORD_BLUE_MID = '#1565C0';
-const FORD_BLUE_LIGHT = '#1976D2';
-
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,8 +35,9 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       await loginUser(email.trim(), password);
-      await seedIfEmpty();
-      navigation.navigate('HomeTabs');
+      migrarPrecos().catch(() => {});
+      solicitarPermissao();
+      router.replace('/(tabs)/sedas');
     } catch (error) {
       Alert.alert('Erro ao entrar', error.message);
     } finally {
@@ -52,8 +53,9 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       await registerUser(email.trim(), password);
-      await seedIfEmpty();
-      navigation.navigate('HomeTabs');
+      migrarPrecos().catch(() => {});
+      solicitarPermissao();
+      router.replace('/(tabs)/sedas');
     } catch (error) {
       Alert.alert('Erro ao cadastrar', error.message);
     } finally {
@@ -145,7 +147,7 @@ export default function LoginScreen({ navigation }) {
             {activeTab === 'login' && (
               <TouchableOpacity
                 style={styles.forgotContainer}
-                onPress={() => navigation.navigate('EsqueciSenha')}
+                onPress={() => router.push('/esqueci-senha')}
               >
                 <View style={styles.dividerLine} />
                 <Text style={styles.forgotText}>Esqueceu a senha?</Text>

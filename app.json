@@ -3,6 +3,7 @@
     "name": "challenge-ford-v1",
     "slug": "challenge-ford-v1",
     "version": "1.0.0",
+    "scheme": "challenge-ford",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -23,7 +24,18 @@
       "edgeToEdgeEnabled": true
     },
     "web": {
+      "bundler": "metro",
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#003478"
+        }
+      ]
+    ]
   }
 }

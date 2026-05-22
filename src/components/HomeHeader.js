@@ -10,19 +10,22 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import FordLogo from './FordLogo';
 
 const FORD_BLUE = '#003478';
 const DRAWER_WIDTH = Dimensions.get('window').width * 0.55;
 
 const MENU_ITEMS = [
-  { icon: 'car', label: 'Sedãs', screen: 'Sedas' },
-  { icon: 'car-sports', label: 'Esportivos', screen: 'Esportivos' },
-  { icon: 'car-pickup', label: 'Caminhonetes', screen: 'Caminhonetes' },
-  { icon: 'history', label: 'Histórico', screen: 'Historico' },
+  { icon: 'car', label: 'Sedãs', rota: '/(tabs)/sedas' },
+  { icon: 'car-sports', label: 'Esportivos', rota: '/(tabs)/esportivos' },
+  { icon: 'car-pickup', label: 'Caminhonetes', rota: '/(tabs)/caminhonetes' },
+  { icon: 'history', label: 'Histórico', rota: '/(tabs)/historico' },
+  { icon: 'shield-crown-outline', label: 'Administração', rota: '/admin' },
 ];
 
-export default function HomeHeader({ navigation }) {
+export default function HomeHeader() {
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
   const overlayAnim = useRef(new Animated.Value(0)).current;
@@ -30,31 +33,15 @@ export default function HomeHeader({ navigation }) {
   function openDrawer() {
     setVisible(true);
     Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 260,
-        useNativeDriver: true,
-      }),
-      Animated.timing(overlayAnim, {
-        toValue: 1,
-        duration: 260,
-        useNativeDriver: true,
-      }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 260, useNativeDriver: true }),
+      Animated.timing(overlayAnim, { toValue: 1, duration: 260, useNativeDriver: true }),
     ]).start();
   }
 
   function closeDrawer(callback) {
     Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: -DRAWER_WIDTH,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-      Animated.timing(overlayAnim, {
-        toValue: 0,
-        duration: 220,
-        useNativeDriver: true,
-      }),
+      Animated.timing(slideAnim, { toValue: -DRAWER_WIDTH, duration: 220, useNativeDriver: true }),
+      Animated.timing(overlayAnim, { toValue: 0, duration: 220, useNativeDriver: true }),
     ]).start(() => {
       setVisible(false);
       if (callback) callback();
@@ -62,9 +49,7 @@ export default function HomeHeader({ navigation }) {
   }
 
   function handleLogout() {
-    closeDrawer(() => {
-      navigation.getParent()?.navigate('Login') ?? navigation.navigate('Login');
-    });
+    closeDrawer(() => router.replace('/'));
   }
 
   return (
@@ -92,7 +77,7 @@ export default function HomeHeader({ navigation }) {
               <TouchableOpacity
                 key={item.label}
                 style={styles.menuItem}
-                onPress={() => closeDrawer(() => navigation.navigate(item.screen))}
+                onPress={() => closeDrawer(() => router.navigate(item.rota))}
               >
                 <MaterialCommunityIcons name={item.icon} size={22} color={FORD_BLUE} />
                 <Text style={styles.menuLabel}>{item.label}</Text>
@@ -122,14 +107,8 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingBottom: 16,
   },
-  modalRoot: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-  },
+  modalRoot: { flex: 1, flexDirection: 'row' },
+  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
   drawer: {
     width: DRAWER_WIDTH,
     backgroundColor: '#FFFFFF',
@@ -150,20 +129,7 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     marginBottom: 20,
   },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    gap: 14,
-  },
-  menuLabel: {
-    fontSize: 16,
-    color: FORD_BLUE,
-    fontWeight: '500',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#E0E0E0',
-    marginVertical: 8,
-  },
+  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, gap: 14 },
+  menuLabel: { fontSize: 16, color: FORD_BLUE, fontWeight: '500' },
+  divider: { height: 1, backgroundColor: '#E0E0E0', marginVertical: 8 },
 });

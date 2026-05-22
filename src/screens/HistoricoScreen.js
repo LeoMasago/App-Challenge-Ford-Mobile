@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -7,19 +7,19 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import HomeHeader from '../components/HomeHeader';
 import { carregarHistorico, limparHistorico } from '../services/historyService';
-
-const FORD_BLUE = '#003478';
+import { FORD_BLUE } from '../theme';
 
 function formatarData(timestamp) {
   const d = new Date(timestamp);
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-export default function HistoricoScreen({ navigation }) {
+export default function HistoricoScreen() {
+  const router = useRouter();
   const [historico, setHistorico] = useState([]);
 
   useFocusEffect(
@@ -29,11 +29,14 @@ export default function HistoricoScreen({ navigation }) {
   );
 
   function repetirBusca(item) {
-    navigation.navigate('Resultados', {
-      marca: item.marca,
-      modelo: item.modelo,
-      versao: item.versao,
-      atributos: item.atributos,
+    router.push({
+      pathname: '/resultados',
+      params: {
+        marca: item.marca,
+        modelo: item.modelo,
+        versao: item.versao,
+        atributos: JSON.stringify(item.atributos),
+      },
     });
   }
 
@@ -57,7 +60,7 @@ export default function HistoricoScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <HomeHeader navigation={navigation} />
+      <HomeHeader />
 
       <View style={styles.titleRow}>
         <Text style={styles.title}>Histórico</Text>
@@ -126,39 +129,12 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 8,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: FORD_BLUE,
-  },
-  limparLink: {
-    fontSize: 13,
-    color: '#CC0000',
-    fontWeight: '600',
-  },
-  empty: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 40,
-  },
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: FORD_BLUE,
-    marginTop: 16,
-  },
-  emptySubtitle: {
-    fontSize: 13,
-    color: '#AAA',
-    textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 20,
-  },
-  list: {
-    padding: 16,
-    paddingBottom: 24,
-  },
+  title: { fontSize: 22, fontWeight: '700', color: FORD_BLUE },
+  limparLink: { fontSize: 13, color: '#CC0000', fontWeight: '600' },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 40 },
+  emptyTitle: { fontSize: 17, fontWeight: '700', color: FORD_BLUE, marginTop: 16 },
+  emptySubtitle: { fontSize: 13, color: '#AAA', textAlign: 'center', marginTop: 8, lineHeight: 20 },
+  list: { padding: 16, paddingBottom: 24 },
   card: {
     backgroundColor: '#F4F6FA',
     borderRadius: 12,
@@ -175,24 +151,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardBody: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: FORD_BLUE,
-  },
-  cardSub: {
-    fontSize: 12,
-    color: '#888',
-    marginTop: 2,
-  },
-  cardDate: {
-    fontSize: 11,
-    color: '#BBB',
-    marginTop: 3,
-  },
+  cardBody: { flex: 1 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: FORD_BLUE },
+  cardSub: { fontSize: 12, color: '#888', marginTop: 2 },
+  cardDate: { fontSize: 11, color: '#BBB', marginTop: 3 },
   rodape: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -200,8 +162,5 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingBottom: 16,
   },
-  rodapeText: {
-    fontSize: 11,
-    color: '#CCC',
-  },
+  rodapeText: { fontSize: 11, color: '#CCC' },
 });

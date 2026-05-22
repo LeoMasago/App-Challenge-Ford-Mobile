@@ -20,6 +20,8 @@ Este repositório contém a entrega da disciplina **Mobile Development and IoT**
 
 O aplicativo foi desenvolvido em **React Native com Expo** e resolve o **Desafio 01 — Inteligência Competitiva Automotiva**: a partir de uma entrada simples (marca, modelo, versão e lista de atributos técnicos), o app consulta uma base de dados no Firebase Realtime Database e retorna uma lista padronizada de especificações técnicas, com campos explícitos para dados não disponíveis.
 
+Além da consulta individual, o app oferece **comparação lado a lado** entre dois veículos, integração com a **Tabela FIPE** para preços de mercado em tempo real, e um **painel administrativo** para gestão da base de dados.
+
 ---
 
 ## Objetivo do Challenge
@@ -32,7 +34,7 @@ O programa **Ford & FIAP: Dados na Prática** une a excelência acadêmica da FI
 
 **Entradas obrigatórias:**
 - Marca, Modelo e Versão do veículo
-- Lista livre de atributos técnicos a pesquisar (27 atributos pré-definidos)
+- Lista livre de atributos técnicos a pesquisar (14 atributos pré-definidos)
 
 **Saída obrigatória:**
 - Lista padronizada de especificações técnicas
@@ -50,16 +52,16 @@ O programa **Ford & FIAP: Dados na Prática** une a excelência acadêmica da FI
 | [Expo](https://expo.dev/) | ~54.0.33 | Framework mobile multiplataforma |
 | [React Native](https://reactnative.dev/) | 0.81.5 | Base do app mobile |
 | [React](https://react.dev/) | 19.1.0 | Biblioteca de UI |
-| [React Navigation](https://reactnavigation.org/) | ^7.x | Navegação entre telas |
-| `@react-navigation/native-stack` | ^7.x | Stack Navigator (auth flow) |
-| `@react-navigation/bottom-tabs` | ^7.x | Bottom Tab Navigator (home) |
+| [Expo Router](https://expo.github.io/router/) | ~4.x | Roteamento baseado em arquivos |
 | [Firebase](https://firebase.google.com/) | ^12.12.0 | Autenticação e Realtime Database |
-| [@react-native-async-storage/async-storage](https://react-native-async-storage.github.io/async-storage/) | ^2.x | Histórico de buscas local |
+| [@react-native-async-storage/async-storage](https://react-native-async-storage.github.io/async-storage/) | ^2.x | Cache local e histórico de buscas |
+| [expo-notifications](https://docs.expo.dev/versions/latest/sdk/notifications/) | SDK 54 | Notificações push locais |
 | [expo-linear-gradient](https://docs.expo.dev/versions/latest/sdk/linear-gradient/) | SDK 54 | Gradientes visuais |
 | [@expo/vector-icons](https://icons.expo.fyi/) | SDK 54 | Ícones (MaterialCommunityIcons) |
 | [react-native-dotenv](https://github.com/goatandsheep/react-native-dotenv) | ^3.4.11 | Variáveis de ambiente via `.env` |
 | react-native-safe-area-context | ~5.6.0 | Safe area para iOS/Android |
 | react-native-screens | ~4.16.0 | Otimização de telas nativas |
+| [API FIPE](https://deividfortuna.github.io/fipe/) | — | Preços de mercado em tempo real |
 
 ---
 
@@ -67,39 +69,51 @@ O programa **Ford & FIAP: Dados na Prática** une a excelência acadêmica da FI
 
 ```
 ford-challenge-v1/
-├── App.js                          # Ponto de entrada
+├── app/                            # Rotas Expo Router (file-based routing)
+│   ├── _layout.js                  # Layout raiz (Stack)
+│   ├── index.js                    # Rota raiz → LoginScreen
+│   ├── esqueci-senha.js            # Recuperação de senha
+│   ├── busca.js                    # Busca personalizada
+│   ├── resultados.js               # Especificações técnicas
+│   ├── comparacao.js               # Comparação lado a lado
+│   ├── admin.js                    # Painel administrativo
+│   ├── admin-form.js               # Formulário de cadastro/edição
+│   └── (tabs)/
+│       ├── _layout.js              # Bottom Tab Navigator
+│       ├── sedas.js                # Tab — Sedãs
+│       ├── esportivos.js           # Tab — Esportivos
+│       ├── caminhonetes.js         # Tab — Caminhonetes
+│       └── historico.js            # Tab — Histórico de buscas
+├── src/
+│   ├── theme.js                    # Cores globais (FORD_BLUE e variações)
+│   ├── firebase/
+│   │   ├── config.js               # Inicialização Firebase
+│   │   ├── authService.js          # Login, cadastro, reset de senha
+│   │   ├── vehicleService.js       # Consulta e persistência de veículos
+│   │   └── migratePrecos.js        # Migração única de normalização de preços
+│   ├── services/
+│   │   ├── fipeService.js          # Integração Tabela FIPE (cache + retry)
+│   │   ├── historyService.js       # Histórico de buscas (AsyncStorage, TTL 30d)
+│   │   └── notificacaoService.js   # Notificações push (Expo Notifications)
+│   ├── data/
+│   │   └── atributosData.js        # Lista de 14 atributos técnicos
+│   ├── components/
+│   │   ├── FordLogo.js             # Logo Ford (pure React Native)
+│   │   ├── HomeHeader.js           # Header com menu lateral animado
+│   │   ├── VehicleCard.js          # Card reutilizável de veículo
+│   │   └── CategoryScreen.js       # Tela de categoria compartilhada
+│   └── screens/
+│       ├── LoginScreen.js          # Login / Cadastro (pill tab)
+│       ├── ForgotPasswordScreen.js # Recuperação de senha
+│       ├── BuscaScreen.js          # Busca individual e comparação
+│       ├── ResultadosScreen.js     # Especificações + preço FIPE
+│       ├── ComparacaoScreen.js     # Comparação técnica lado a lado
+│       ├── HistoricoScreen.js      # Histórico de buscas
+│       ├── AdminScreen.js          # Painel de gestão da base
+│       └── AdminFormScreen.js      # Formulário de adição/edição de veículo
 ├── app.json                        # Configuração Expo
-├── babel.config.js                 # Configuração Babel + dotenv
-├── .env                            # Credenciais Firebase (git-ignored)
-├── assets/                         # Ícones e splash screen
-└── src/
-    ├── theme.js                    # Cores globais (FORD_BLUE e variações)
-    ├── firebase/
-    │   ├── config.js               # Inicialização Firebase
-    │   ├── authService.js          # login, cadastro, reset de senha
-    │   └── vehicleService.js       # seed e consulta de especificações
-    ├── services/
-    │   └── historyService.js       # Histórico de buscas (AsyncStorage)
-    ├── data/
-    │   ├── veiculosData.js         # Dataset com specs de 8 veículos
-    │   └── atributosData.js        # Lista de 27 atributos técnicos
-    ├── navigation/
-    │   ├── AppNavigator.js         # Stack Navigator raiz
-    │   └── HomeTabs.js             # Bottom Tab Navigator (4 abas)
-    ├── components/
-    │   ├── FordLogo.js             # Logo Ford (pure React Native)
-    │   ├── HomeHeader.js           # Header com menu lateral animado
-    │   ├── VehicleCard.js          # Card reutilizável de veículo
-    │   └── CategoryScreen.js       # Tela de categoria compartilhada
-    └── screens/
-        ├── LoginScreen.js          # Login / Cadastro (pill tab)
-        ├── ForgotPasswordScreen.js # Recuperação de senha
-        ├── SedasScreen.js          # Tab — Sedãs
-        ├── EsportivosScreen.js     # Tab — Esportivos
-        ├── CaminhonetesScreen.js   # Tab — Caminhonetes
-        ├── HistoricoScreen.js      # Tab — Histórico de buscas
-        ├── BuscaScreen.js          # Formulário de busca personalizada
-        └── ResultadosScreen.js     # Exibição das especificações
+├── babel.config.js                 # Babel + dotenv + reanimated
+└── .env                            # Credenciais Firebase (git-ignored)
 ```
 
 ---
@@ -112,7 +126,6 @@ ford-challenge-v1/
 | Caminhonete | Toyota Hilux 2024 |
 | Caminhonete | Chevrolet S10 2024 |
 | Caminhonete | Mitsubishi L200 Triton 2024 |
-| Caminhonete | Volkswagen Amarok 2024 |
 | Sedã | Toyota Corolla 2024 |
 | Sedã | Honda Civic 2024 |
 | Esportivo | Ford Mustang 2024 |
@@ -174,34 +187,45 @@ Escaneie o QR Code com o **Expo Go** (Android/iOS) ou pressione:
 ## Fluxo de Navegação
 
 ```
-LoginScreen
-  ├── Pill "Login"     → autenticação → HomeTabs
-  └── Pill "Cadastro"  → criação de conta → HomeTabs
-       └── "Esqueceu a senha?" → ForgotPasswordScreen
+LoginScreen (/)
+  ├── Pill "Login"     → autenticação → (tabs)
+  └── Pill "Cadastro"  → criação de conta → (tabs)
+       └── "Esqueceu a senha?" → /esqueci-senha
 
-HomeTabs (Bottom Tabs)
-  ├── Sedãs            → lista de sedãs → toque no card → Resultados
-  ├── Esportivos       → lista de esportivos → toque no card → Resultados
-  ├── Caminhonetes     → lista de caminhonetes → toque no card → Resultados
-  │    └── "Busca personalizada" → BuscaScreen → Resultados
-  └── Histórico        → lista de buscas anteriores → toque → Resultados
+(tabs) — Bottom Tab Navigator
+  ├── Sedãs       → lista de sedãs   → toque no card → /resultados
+  ├── Esportivos  → lista de esportivos             → /resultados
+  ├── Caminhonetes → lista de caminhonetes          → /resultados
+  │    └── "Busca personalizada" → /busca
+  └── Histórico   → lista de buscas anteriores      → /resultados
 
-BuscaScreen
-  ├── Campos: Marca, Modelo, Versão/Ano
-  ├── Seleção de atributos (27 pré-definidos + customizados)
-  └── "Buscar Especificações" → ResultadosScreen
+/busca — BuscaScreen
+  ├── Modo Individual → Marca, Modelo, Versão + atributos → /resultados
+  └── Modo Comparar  → Veículo 1 + Veículo 2 + atributos → /comparacao
 
-ResultadosScreen
-  └── Lista padronizada de specs com status disponível / não disponível
+/resultados — ResultadosScreen
+  └── Especificações técnicas + Preço FIPE em tempo real
+
+/comparacao — ComparacaoScreen
+  └── Tabela lado a lado com destaque de iguais / diferentes / N/D
+
+/admin — AdminScreen
+  ├── Lista todos os veículos da base
+  ├── Editar → /admin-form?modo=editar
+  ├── Excluir (com confirmação)
+  └── Adicionar novo → /admin-form?modo=adicionar
 ```
 
 ---
 
 ## Funcionalidades
 
-- **Autenticação** — login e cadastro via Firebase Authentication (email/senha), recuperação de senha
-- **Base de dados** — especificações técnicas de 8 veículos armazenadas no Firebase Realtime Database, populadas automaticamente no primeiro acesso
-- **Busca personalizada** — formulário com seleção livre de atributos técnicos (27 pré-definidos)
+- **Autenticação** — login e cadastro via Firebase Authentication (email/senha), recuperação de senha por e-mail
 - **Navegação por categoria** — listagem de veículos por tipo (Sedãs, Esportivos, Caminhonetes) com acesso rápido às especificações completas
+- **Busca personalizada** — formulário com seleção livre de 14 atributos técnicos pré-definidos
+- **Comparação técnica** — modo lado a lado com código de cores: verde (igual), amarelo (diferente), cinza (N/D)
+- **Tabela FIPE** — preço de mercado consultado em tempo real para cada veículo, com cache de 7 dias, retry automático em caso de rate limit (429) e fallback para dados desatualizados
 - **Saída padronizada** — formato de resultado sempre consistente, com "Não disponível" explícito para dados ausentes
 - **Histórico de buscas** — últimas 10 pesquisas salvas localmente via AsyncStorage, com expiração automática após 30 dias
+- **Notificações push** — notificação local disparada ao concluir uma comparação entre veículos
+- **Painel administrativo** — interface para adicionar, editar e excluir veículos da base Firebase diretamente pelo app

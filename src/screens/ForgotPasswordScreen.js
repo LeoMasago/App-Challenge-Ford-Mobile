@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { resetUserPassword } from '../firebase/authService';
 import FordLogo from '../components/FordLogo';
 
@@ -18,7 +19,8 @@ const FORD_BLUE = '#003478';
 const FORD_BLUE_MID = '#1565C0';
 const FORD_BLUE_LIGHT = '#1976D2';
 
-export default function ForgotPasswordScreen({ navigation }) {
+export default function ForgotPasswordScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +33,7 @@ export default function ForgotPasswordScreen({ navigation }) {
     try {
       await resetUserPassword(email.trim());
       Alert.alert('Email enviado', 'Verifique sua caixa de entrada.');
-      navigation.goBack();
+      router.back();
     } catch (error) {
       Alert.alert('Erro', error.message);
     } finally {
@@ -46,7 +48,7 @@ export default function ForgotPasswordScreen({ navigation }) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <View style={styles.inner}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <MaterialCommunityIcons name="arrow-left" size={24} color="#FFFFFF" />
           </TouchableOpacity>
 

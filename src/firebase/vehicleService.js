@@ -1,6 +1,5 @@
-import { ref, get, set } from 'firebase/database';
+import { ref, get, set, remove } from 'firebase/database';
 import { db } from './config';
-import { VEICULOS_DATA } from '../data/veiculosData';
 
 function normalizar(str) {
   return String(str)
@@ -17,10 +16,28 @@ function chaveVeiculo(marca, modelo) {
   return `${normalizar(marca)}_${normalizar(modelo)}`;
 }
 
-export async function seedIfEmpty() {
+export function gerarChave(marca, modelo) {
+  return chaveVeiculo(marca, modelo);
+}
+
+export async function salvarVeiculo(chave, dados) {
+  await set(ref(db, `veiculos/${chave}`), dados);
+}
+
+export async function excluirVeiculo(chave) {
+  await remove(ref(db, `veiculos/${chave}`));
+}
+
+export async function buscarTodosVeiculos() {
   const snapshot = await get(ref(db, 'veiculos'));
-  if (snapshot.exists()) return;
-  await set(ref(db, 'veiculos'), VEICULOS_DATA);
+  if (!snapshot.exists()) return [];
+  return Object.entries(snapshot.val()).map(([chave, dados]) => ({ chave, ...dados }));
+}
+
+export async function buscarVeiculosPorCategoria(categoria) {
+  const snapshot = await get(ref(db, 'veiculos'));
+  if (!snapshot.exists()) return [];
+  return Object.values(snapshot.val()).filter((v) => v.categoria === categoria);
 }
 
 export async function buscarEspecificacoes(marca, modelo, versao, atributos) {
