@@ -4,6 +4,26 @@
 
 ---
 
+## Screenshots
+
+<div align="center">
+
+| Login | Cadastro | Recuperar Senha |
+|:---:|:---:|:---:|
+| ![Login](docs/screenshots/login.jpeg) | ![Cadastro](docs/screenshots/cadastro.jpeg) | ![Recuperar Senha](docs/screenshots/recuperar_senha.jpeg) |
+
+| Lista Caminhonetes | Menu Lateral | Especificações Técnicas |
+|:---:|:---:|:---:|
+| ![Caminhonetes](docs/screenshots/caminhonetes.jpeg) | ![Menu](docs/screenshots/menu.jpeg) | ![Especificações](docs/screenshots/especificacoes.jpeg) |
+
+| Comparação Técnica | Painel Admin | Adicionar Veículo |
+|:---:|:---:|:---:|
+| ![Comparação](docs/screenshots/comparar_veiculos.jpeg) | ![Admin](docs/screenshots/administracao.jpeg) | ![Adicionar](docs/screenshots/adicionar_veiculo.jpeg) |
+
+</div>
+
+---
+
 ## Integrantes do Grupo
 
 | Nome | RM |
