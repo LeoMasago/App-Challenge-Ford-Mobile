@@ -4,6 +4,16 @@
 
 ---
 
+## Integrantes do Grupo
+
+| Nome | RM |
+|---|---|
+| Léo Masago | RM557768 |
+| Eduardo Tomazela | RM556807 |
+| Luiz Henrique Silva | RM555235 |
+
+---
+
 ## Screenshots
 
 <div align="center">
@@ -21,16 +31,6 @@
 | ![Comparação](docs/screenshots/comparar_veiculos.jpeg) | ![Admin](docs/screenshots/administracao.jpeg) | ![Adicionar](docs/screenshots/adicionar_veiculo.jpeg) |
 
 </div>
-
----
-
-## Integrantes do Grupo
-
-| Nome | RM |
-|---|---|
-| Léo Masago | RM557768 |
-| Eduardo Tomazela | RM556807 |
-| Luiz Henrique Silva | RM555235 |
 
 ---
 
