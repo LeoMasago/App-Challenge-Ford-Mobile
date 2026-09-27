@@ -1,0 +1,13 @@
+﻿$ adb devices
+List of devices attached
+emulator-5554	device
+
+
+$ adb shell getprop ro.product.model  -> sdk_gphone64_x86_64
+$ adb shell getprop ro.build.version.release  -> Android 14
+$ adb shell getprop ro.build.version.sdk  -> API 34
+$ adb install -r ford.apk  -> Success
+$ adb shell pm list packages com.fiap.challengeford
+package:com.fiap.challengeford
+
+$ adb shell pidof com.fiap.challengeford  -> 4358 (app em execucao)

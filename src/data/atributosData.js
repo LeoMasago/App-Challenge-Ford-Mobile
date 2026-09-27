@@ -1,0 +1,16 @@
+export const TODOS_ATRIBUTOS = [
+  { id: 'motor', label: 'Motor', icon: 'engine' },
+  { id: 'potencia', label: 'Potência', icon: 'speedometer' },
+  { id: 'torque', label: 'Torque Máx', icon: 'rotate-right' },
+  { id: 'transmissao', label: 'Transmissão', icon: 'cog' },
+  { id: 'tracao', label: 'Tração', icon: 'car-cog' },
+  { id: 'amortecedores', label: 'Amortecedores', icon: 'car-lifted-pickup' },
+  { id: 'aceleracao', label: '0-100 km/h', icon: 'speedometer-medium' },
+  { id: 'modos_conducao', label: 'Modos de Condução', icon: 'terrain' },
+  { id: 'modos_volante', label: 'Modos de Volante', icon: 'steering' },
+  { id: 'modos_escapamento', label: 'Modos de Escapamento', icon: 'weather-windy' },
+  { id: 'modos_amortecedor', label: 'Modos de Amortecedor', icon: 'car-settings' },
+  { id: 'farois', label: 'Faróis', icon: 'car-light-high' },
+  { id: 'rodas_pneus', label: 'Rodas e Pneus', icon: 'circle-double' },
+  { id: 'preco', label: 'Preço', icon: 'currency-brl' },
+];
