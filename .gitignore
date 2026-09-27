@@ -44,3 +44,6 @@ env.js
 
 # APK local (publicado via GitHub Releases)
 /release
+
+# Claude Code local
+.claude/
